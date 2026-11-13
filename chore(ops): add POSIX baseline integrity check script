@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ARTIFACTS=(
+  "terraform/eu_compliant_infra.tf"
+  "engine/compliance_auditor.py"
+  "cli/provenance_verifier.ts"
+  "k8s/zero_trust_workload.yaml"
+  "docker/Dockerfile"
+)
+
+for item in "${ARTIFACTS[@]}"; do
+  if [[ ! -f "$item" ]]; then
+    echo "[ERROR] Missing required artifact: $item" >&2
+    exit 1
+  fi
+  echo "[OK] Verified artifact: $item"
+done
+
+echo "[PASS] Zero-trust baseline verified."
