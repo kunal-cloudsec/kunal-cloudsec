@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nordicsec-policy-enforcer
+  namespace: regulated-prod
+  labels:
+    tier: security-control-plane
+    standard: iso-27001
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nordicsec-enforcer
+  template:
+    metadata:
+      labels:
+        app: nordicsec-enforcer
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: auditor
+          image: python:3.11-slim
+          command: ["python3", "/opt/engine/compliance_auditor.py"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+              
