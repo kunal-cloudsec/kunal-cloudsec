@@ -1,0 +1,44 @@
+name: Linux CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  linux-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Linux system check
+        run: |
+          echo "🐧 Linux CI started"
+          uname -a
+          cat /etc/os-release
+
+      - name: Project structure check
+        run: |
+          test -f commands.txt
+          test -d logs
+          echo "✅ Project structure OK"
+
+      - name: Bash syntax check
+        run: |
+          scripts=$(find . -type f -name "*.sh")
+          if [ -n "$scripts" ]; then
+            for file in $scripts; do
+              bash -n "$file"
+              echo "✅ $file passed"
+            done
+          else
+            echo "ℹ️ No Bash scripts yet"
+          fi
+
+      - name: Final validation
+        run: |
+          echo "🐧 Linux validation PASSED"
+          echo "🚀 DevSecOps CI GREEN"
