@@ -1,0 +1,82 @@
+name: Linux CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  linux-validation:
+    name: Linux Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: System information
+        run: |
+          set -euo pipefail
+
+          echo "🐧 Linux CI started"
+          echo "Kernel:"
+          uname -a
+
+          echo
+          echo "Operating system:"
+          cat /etc/os-release
+
+          echo
+          echo "Working directory:"
+          pwd
+
+      - name: Repository validation
+        run: |
+          set -euo pipefail
+
+          echo "📁 Repository contents:"
+          find . -maxdepth 2 -type f \
+            -not -path "./.git/*" \
+            -print | sort
+
+          echo
+          echo "✅ Repository checkout successful"
+
+      - name: Bash script validation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t scripts < <(
+            find . \
+              -type f \
+              -name "*.sh" \
+              -not -path "./.git/*"
+          )
+
+          if [ "${#scripts[@]}" -eq 0 ]; then
+            echo "ℹ️ No Bash scripts found"
+            exit 0
+          fi
+
+          for script in "${scripts[@]}"; do
+            echo "🔍 Checking: $script"
+            bash -n "$script"
+            echo "✅ Passed: $script"
+          done
+
+      - name: Final validation
+        run: |
+          set -euo pipefail
+
+          echo "========================================"
+          echo "🐧 Linux validation PASSED"
+          echo "🔐 CI validation PASSED"
+          echo "🚀 Linux CI pipeline is GREEN"
+          echo "========================================"
